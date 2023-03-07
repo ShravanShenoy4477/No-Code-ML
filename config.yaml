@@ -1,0 +1,69 @@
+cookie:
+  expiry_days: 30
+  key: JRJ7OB5uXTAGkI8ElD5S77dWOUveDhYM
+  name: Cookie_test
+credentials:
+  usernames:
+    jsmith:
+      email: jsmith@gmail.com
+      name: John Smith
+      password: $2b$12$Ltqk4bWtsxXMrIsOEoDOIuy2xN3slFPRRWzQL8qbI.Bo1.GiN9GAq
+    rbriggs:
+      email: rbriggs@gmail.com
+      name: Rebecca Briggs
+      password: $2b$12$B01mDjJAJO0/iZGIsuvgsOjhBRZZ2wu6ih9i.ymDUCOKMLrLSZLY2
+    shravans:
+      email: shr@gmail.com
+      name: Shravan
+      password: $2b$12$vY1/LSBMgRlR/vW3.6P41ePPKROPrSI.0wpNpZ22vPKFiZ22UxPDS
+    shrey447:
+      email: shreyas.32@gmail.com
+      name: Shreyas S
+      password: $2b$12$2AvReeEcRUx6WNHVsSDSEOuYrdUZkI0wolVDpXGmsAdLd6Em6sAO.
+    shreyaa441:
+      email: shreya.32@gmail.com
+      name: Shreya
+      password: $2b$12$ck8h0LFA2857o1s6.ka28.9ZxNhH.whRDW49P8g4IehLvVHgiDIV6
+    shreyab441:
+      email: shreya.32@gmail.com
+      name: Shreya
+      password: $2b$12$Nc9ocQwsUwnsIW14OC2ciuxqNM4dn8ID/8n60.fEtRLG7YzZHHBCK
+    shreyac441:
+      email: shreya.32@gmail.com
+      name: Shreya
+      password: $2b$12$qygcELgh.Y7C6KpODK.r.OIvYXnhBNuG3vXC/7TVLd3dfksYCqaha
+    shreyad441:
+      email: shreya.32@gmail.com
+      name: Shreya
+      password: $2b$12$VjsZX4M79ewWlJQUtHzl4ucLqJiJjag4LZjF6KCslwaOs7afRwluy
+    shreyae441:
+      email: shreya.32@gmail.com
+      name: Shreya
+      password: $2b$12$PR/j9uni5MjbFLZxbephwuwOK27igO337d9DAr7FLrSYC7XZ/Bx1q
+    shreyaf441:
+      email: shreya.32@gmail.com
+      name: Shreya
+      password: $2b$12$miebfDPYyElJ6BQHkbKJhetMm78WOHPqnhAArLnYedE0Fa1Fp9GQG
+    shreyag441:
+      email: shreya.32@gmail.com
+      name: Shreya
+      password: $2b$12$X64l/5W1l3nq39/X2hyUaujVLSOwyolnNqrwn8qc3TixqfzNNvTpi
+    shreyah441:
+      email: shreya.32@gmail.com
+      name: Shreya
+      password: $2b$12$OWSMdgEephRPTSJeBTK97uDm9Gji5/uHP27k6pQM371lP1nra2KXq
+    shreyat441:
+      email: shreya.32@gmail.com
+      name: Shreya
+      password: $2b$12$FDJsrjhjYkrtEOZClssKSedSQfWHuRhQ6MbCgFhs3BTgHXZnLO5mC
+    shreyau441:
+      email: shreya.32@gmail.com
+      name: Shreya
+      password: $2b$12$UTIxNOG6.tX2nUQJYAilDuyAPDRvW48F0So2BF8YUixNDnGDSv6Vy
+    shreyaz441:
+      email: shreya.32@gmail.com
+      name: Shreya
+      password: $2b$12$WZl0AoQouRWvsFqBZHNta.PXISFdinliw7oY4pGJyK.yKi43OVn7m
+preauthorized:
+  emails:
+  - melsby@gmail.com
