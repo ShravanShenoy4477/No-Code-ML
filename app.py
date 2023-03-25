@@ -1,7 +1,7 @@
 from operator import index
 import streamlit as st
 import plotly.express as px
-
+import extra_streamlit_components as stx
 from pycaret.classification import setup, compare_models, pull, save_model
 import pandas_profiling
 import pandas as pd
@@ -15,6 +15,7 @@ import numpy as np
 from sklearn.preprocessing import OrdinalEncoder, OneHotEncoder, StandardScaler, MinMaxScaler, RobustScaler, Normalizer
 from streamlit_tags import st_tags
 from sklearn.model_selection import train_test_split
+import time
 
 columns = []
 cat_per_column = []
@@ -22,7 +23,6 @@ col_cats_dict = {}
 cat_cols = []
 
 norm = False
-
 with open('config.yaml') as file:
     config = yaml.safe_load(file)
 authenticator = stauth.Authenticate(config['credentials'],
@@ -40,7 +40,6 @@ if os.path.exists('./dataset.csv'):
 login, signup = False, False
 
 authenticated = False
-
 
 if 'login' not in st.session_state:
     st.session_state.login = False
@@ -65,23 +64,25 @@ if st.session_state.login:
     elif authentication_status == None:
         st.warning('Please enter your username and password')
 
+
 elif st.session_state.signup:
     try:
         if authenticator.register_user(
                 'Register user', preauthorization=False):
             st.success('User registered successfully')
             authenticated = True
-            name = ""
+            name = st.session_state["name"]
         # placeholder.empty()
     except Exception as e:
         st.error(e)
     with open('config.yaml', 'w') as file:
         yaml.dump(config, file, default_flow_style=False)
 
+
 if authenticated:
     placeholder.empty()
     st.write(f'Welcome *{name}*')
-    *_, col6 = st.columns(6)
+    *_, col5, col6 = st.columns(6)
     with col6:
         authenticator.logout('Logout', 'main')
     with st.sidebar:
@@ -95,34 +96,49 @@ if authenticated:
         st.title("Upload Your Dataset")
         file = st.file_uploader("Upload Your Dataset")
         if file:
-            type_of_file = file.name.split('.')[1]
-            if type_of_file == 'csv':
-                df = pd.read_csv(file, index_col=None)
-            elif type_of_file == 'xlsx':
-                df = pd.read_excel(file, index_col=None)
+            type_of_file = file.name.split('.')[-1]
+            file_name = file.name.split('.')[0]
+            if type_of_file == 'csv' or type_of_file == 'txt':
+                sep = st.text_input('Enter separator', value=',')
+                df = pd.read_csv(file, index_col=None, sep=sep)
+            elif type_of_file == 'xlsx' or type_of_file == 'xls':
+                df = pd.read_excel(file, index_col=None, header=1)
             elif type_of_file == 'json':
                 df = pd.read_json(file)
-            df.to_csv('dataset.csv', index=None)
+            elif type_of_file == 'zip':
+                import zipfile
+                archive = zipfile.ZipFile(file, 'r')
+                file_name = file_name + ".csv"
+                df = pd.read_csv(archive.read(file_name))
             st.dataframe(df)
+            st.text('Progress Bar')
+            my_bar = st.progress(34, text='Uploading Complete')
 
     if choice == "Profiling":
+        time_before = time.time()
         st.title("Exploratory Data Analysis")
         profile_df = df.profile_report()
         profile_df.to_file("ProfileReport.json")
+        time_after = time.time()
+        duration = time_after-time_before
         st_profile_report(profile_df)
+        print('Profiling time')
+        print(duration)
+        st.text('Progress Bar')
+        my_bar = st.progress(51, text='Profiling Complete')
 
     if choice == "Pre-Processing":
         st.title("Pre-processing your data")
-        choice_2 = st.button("Pre-Process Dataset")
-        if choice_2:
-            st.session_state.preprocess = True
+        st.session_state.preprocess = True
 
         if st.session_state.preprocess:
             # Drop Rows that have only NaN values
             df.dropna(axis=0, thresh=1, inplace=True)
             df.reset_index(inplace=True)
             df.drop(['index'], axis=1, inplace=True)
-            st.text('You should choose to split your dataset into Train-Validation-Test if you haven\'t already. Choose the fraction to split into below')
+            df.fillna('N/A')
+            st.text(
+                'You should choose to split your dataset into Train-Validation-Test.')
             frac_input = st.text_input('Enter fraction of Train', value=0.8)
             frac_input = float(frac_input)
             # Drop Columns based on user Input
@@ -192,7 +208,13 @@ if authenticated:
             test_df = df.drop(train_df.index)
             train_df.to_csv('dataset_train.csv', index=None)
             test_df.to_csv('dataset_test.csv', index=None)
-            st.text('Ordinal Data columns')
+            choice_yes = st.button('Do you wish to profile data again?')
+            if choice_yes:
+                profile_df = train_df.profile_report()
+                profile_df.to_file("ProfileReport.json")
+                st_profile_report(profile_df)
+                st.text('Progress Bar')
+                my_bar = st.progress(68, text='Pre-processing Complete')
 
     if choice == "Modelling":
         if 'preprocess' in st.session_state:
@@ -201,7 +223,7 @@ if authenticated:
             if os.path.exists('./dataset_test.csv'):
                 test_df = pd.read_csv('dataset_test.csv', index_col=None)
             choice_corr = st.radio('Choose type of task to perform',
-                                   ['Classification', 'Regression', 'Clustering'])
+                                   ['Classification', 'Regression'])
             chosen_target = st.selectbox(
                 'Choose the Target Column', df.columns)
             if choice_corr == 'Classification':
@@ -233,7 +255,8 @@ if authenticated:
 
             if st.button('Run Modelling'):
                 if choice_corr == 'Regression':
-                    from pycaret.regression import setup, compare_models, pull, save_model, load_model
+                    time_before = time.time()
+                    from pycaret.regression import *
                     setup(data=train_df, target=chosen_target, train_size=1.0, preprocess=True,
                           silent=True, test_data=test_df, ordinal_features=col_cats_dict, categorical_features=cat_cols, fold=select_fold, verbose=True)
                     setup_df = pull()
@@ -242,17 +265,19 @@ if authenticated:
                     evaluate_model(best_model)
                     compare_df = pull()
                     st.dataframe(compare_df)
-                    best_model = compare_models(sort=choice_metric)
-                    compare_df = pull()
-                    st.dataframe(compare_df)
                     plot_model(best_model, plot='residuals')
                     plot_model(best_model, plot='feature')
+                    st.text('These are predictions on test dataset')
                     predictions = predict_model(best_model)
                     st.dataframe(predictions)
+                    time_after = time.time()
+                    duration = time_after - time_before
+                    print(duration)
                     save_model(best_model, 'best_model')
 
                 if choice_corr == 'Classification':
-                    from pycaret.classification import setup, compare_models, pull, save_model, plot_model, evaluate_model, predict_model
+                    time_before = time.time()
+                    from pycaret.classification import *
                     setup(data=train_df, target=chosen_target, train_size=1.0, preprocess=True,
                           silent=True, test_data=test_df, ordinal_features=col_cats_dict, categorical_features=cat_cols, fold=select_fold, verbose=False)
                     setup_df = pull()
@@ -272,11 +297,20 @@ if authenticated:
                                    display_format='streamlit')
                         plot_model(best_model, 'feature',
                                    display_format='streamlit')
+                    st.text('These are predictions on test dataset')
                     predictions = predict_model(best_model)
                     st.dataframe(predictions)
+                    time_after = time.time()
+                    duration = time_after - time_before
+                    print('Modelling time')
+                    print(duration)
                     save_model(best_model, 'best_model')
+                st.text('Progress Bar')
+                my_bar = st.progress(85, text='Modelling Complete')
 
     if choice == "Download":
         with open('best_model.pkl', 'rb') as f:
             st.download_button('Download Model', f,
                                file_name="best_model.pkl")
+            st.text('Progress Bar')
+            my_bar = st.progress(100, text='Download Complete')
