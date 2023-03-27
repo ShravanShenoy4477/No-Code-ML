@@ -37,26 +37,24 @@ authenticator = stauth.Authenticate(config['credentials'],
 if os.path.exists('./dataset.csv'):
     df = pd.read_csv('dataset.csv', index_col=None)
 st.title("No Code Machine Learning Application")
-st.markdown(
-    """
-        <style>
-@font-face {
-  font-family: 'Times New Roman';
-  font-style: normal;
-  font-weight: 400;
-  src: url(https://fonts.gstatic.com/s/tangerine/v12/IurY6Y5j_oScZZow4VOxCZZM.woff2) format('woff2');
-  unicode-range: U+0000-00FF, U+0131, U+0152-0153, U+02BB-02BC, U+02C6, U+02DA, U+02DC, U+2000-206F, U+2074, U+20AC, U+2122, U+2191, U+2193, U+2212, U+2215, U+FEFF, U+FFFD;
-}
-
-    html, body, [class*="css"]  {
-    font-family: 'Arial';
-    font-size: 18px;
-    }
-    </style>
-
-    """,
-    unsafe_allow_html=True,
-)
+# st.markdown(
+#     """
+#         <style>
+# @font-face {
+#   font-family: 'Times New Roman';
+#   font-style: normal;
+#   font-weight: 400;
+#   src: url(https://fonts.gstatic.com/s/tangerine/v12/IurY6Y5j_oScZZow4VOxCZZM.woff2) format('woff2');
+#   unicode-range: U+0000-00FF, U+0131, U+0152-0153, U+02BB-02BC, U+02C6, U+02DA, U+02DC, U+2000-206F, U+2074, U+20AC, U+2122, U+2191, U+2193, U+2212, U+2215, U+FEFF, U+FFFD;
+# }
+#     html, body, [class*="css"]  {
+#     font-family: 'Arial';
+#     font-size: 18px;
+#     }
+#     </style>
+#     """,
+#     unsafe_allow_html=True,
+# )
 with st.sidebar:
     st.image("https://www.onepointltd.com/wp-content/uploads/2020/03/inno2.png")
     st.title("Software Engineering Lab Project")
@@ -70,11 +68,17 @@ if choice == "Introduction":
     st.write("Happy Training")
     st.image("/Users/shravanshenoy/Desktop/NO_CODE_ML.png")
 
-authenticated = False
-login, signup = False, False
 if choice == 'Authentication':
-    st.session_state.login = False
-    st.session_state.signup = False
+    login, signup = False, False
+
+    authenticated = False
+
+    if 'login' not in st.session_state:
+        st.session_state.login = False
+    if 'signup' not in st.session_state:
+        st.session_state.signup = False
+    st.session_state.login_succ = False
+    st.session_state.signup_succ = False
     login = st.button("Login")
     signup = st.button("Sign Up")
     if login:
@@ -89,10 +93,13 @@ if choice == 'Authentication':
             'Login', 'main')
         if authentication_status:
             authenticated = True
+            st.session_state.login_succ = True
         elif authentication_status == False:
             st.error('Username/password is incorrect')
+            st.session_state.login_succ = False
         elif authentication_status == None:
             st.warning('Please enter your username and password')
+            st.session_state.login_succ = False
 
     elif st.session_state.signup:
         try:
@@ -101,9 +108,12 @@ if choice == 'Authentication':
                 st.success('User registered successfully')
                 authenticated = True
                 name = st.session_state["name"]
+                st.session_state.signup_succ = True
             # placeholder.empty()
         except Exception as e:
             st.error(e)
+            st.session_state.signup_succ = False
+
         with open('config.yaml', 'w') as file:
             yaml.dump(config, file, default_flow_style=False)
 
@@ -115,10 +125,11 @@ if choice == 'Authentication':
             authenticator.logout('Logout', 'main')
 
 if choice == "Upload":
-    # print(st.session_state.login or st.session_state.signup)
-    if (st.session_state.login or st.session_state.signup):
-        st.title("Upload Your Dataset")
-        file = st.file_uploader("Upload Your Dataset")
+    if (st.session_state.login_succ or st.session_state.signup_succ):
+        st.title("Uploading Your Dataset")
+        st.empty()
+        file = st.file_uploader(
+            "Upload Your Dataset in JSON/CSV/Txt/XLS/Archive formats")
         if file:
             type_of_file = file.name.split('.')[-1]
             file_name = file.name.split('.')[0]
@@ -131,9 +142,10 @@ if choice == "Upload":
                 df = pd.read_json(file)
             elif type_of_file == 'zip':
                 import zipfile
-                archive = zipfile.ZipFile(file, 'r')
-                file_name = file_name + ".csv"
-                df = pd.read_csv(archive.read(file_name))
+                with zipfile.ZipFile(file) as z:
+                    file_name = file_name + '.csv'
+                    with z.open(file_name) as f:
+                        df = pd.read_csv(f)
             st.dataframe(df)
             st.text('Progress Bar')
             my_bar = st.progress(34, text='Uploading Complete')
@@ -141,7 +153,7 @@ if choice == "Upload":
         st.text("Authentication not complete")
 
 if choice == "Profiling":
-    if (st.session_state.login or st.session_state.signup):
+    if (st.session_state.login_succ or st.session_state.signup_succ):
         time_before = time.time()
         st.title("Exploratory Data Analysis")
         profile_df = df.profile_report()
@@ -157,7 +169,7 @@ if choice == "Profiling":
         st.text("Authentication not complete")
 
 if choice == "Pre-Processing":
-    if (st.session_state.login or st.session_state.signup):
+    if (st.session_state.login_succ or st.session_state.signup_succ):
         st.title("Pre-processing your data")
         st.session_state.preprocess = True
 
@@ -249,7 +261,7 @@ if choice == "Pre-Processing":
         st.text("Authentication not complete")
 
 if choice == "Modelling":
-    if (st.session_state.login or st.session_state.signup):
+    if (st.session_state.login_succ or st.session_state.signup_succ):
         if 'preprocess' in st.session_state:
             if os.path.exists('./dataset_train.csv'):
                 train_df = pd.read_csv('dataset_train.csv', index_col=None)
@@ -344,7 +356,7 @@ if choice == "Modelling":
         st.text("Authentication not complete")
 
 if choice == "Download":
-    if (st.session_state.login or st.session_state.signup):
+    if (st.session_state.login_succ or st.session_state.signup_succ):
         with open('best_model.pkl', 'rb') as f:
             choice_down = st.download_button('Download Model', f,
                                              file_name="best_model.pkl")

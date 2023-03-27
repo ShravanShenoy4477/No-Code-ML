@@ -12,10 +12,18 @@ credentials:
       email: shravan.shenoy111@gmail.com
       name: shravan shenoy
       password: $2b$12$YXJvvUii/UnkF7RytYJ9f.6KL.oUpL/pooI3RCFpjmQJ6nUE1gq1a
+    shravan447:
+      email: shravanshenoy.cs20@rvce.edu.in
+      name: Shravan Shenoy
+      password: $2b$12$gVRXn7tJVPhsX/7ipnDz4uAHpEO/TtvBsg0f6rRA3UpwHmtzIe/Nm
     shravanshenoy:
       email: shravan.shenoy111@gmail.com
       name: shravan shenoy
       password: $2b$12$X4bNleR.iETbl2PiPm/ueeXVxztNHp4e9cLN98p7pE6PQF3E4Ezua
+    shravanshenoy447:
+      email: shravanshenoy.cs20@rvce.edu.in
+      name: Shravan Shenoy
+      password: $2b$12$XhBW3aORc8rCGNARceG.7e8FTSYhAMZ4Aym1.5DUH5uVLOrd5yvbK
 preauthorized:
   emails:
   - melsby@gmail.com
